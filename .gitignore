@@ -1,0 +1,5 @@
+#node module folder, run npm install in the project dir to download these
+node_modules
+
+#my own options with personal credentials
+options.json

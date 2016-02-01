@@ -1,0 +1,9 @@
+{
+	"discordAccount":{
+		"email":"email@example.com",
+		"password":"your discord password"
+	},
+	"discordInvite":"the http link or just the code at the end",
+	"commandPrefix":"$",
+	"musicTextChannelID":"123456897"
+}

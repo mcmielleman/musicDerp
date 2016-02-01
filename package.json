@@ -1,0 +1,16 @@
+{
+  "name": "discord-musicbot",
+  "version": "0.0.1",
+  "description": "A bot that plays music on discord",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "Mees van Dijk",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^6.0.0",
+    "ytdl-core": "^0.7.9"
+  }
+}
