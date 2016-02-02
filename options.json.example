@@ -5,5 +5,5 @@
 	},
 	"discordInvite":"the http link or just the code at the end",
 	"commandPrefix":"$",
-	"musicTextChannelID":"123456897"
+	"musicTextChannelID":"leave empty to listen for commands in all text channels"
 }
