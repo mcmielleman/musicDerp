@@ -17,7 +17,6 @@ function addToQueue(bot,m) {
 	if (queue[0] === undefined) {
 		queueIsEmpty = true;
 	}
-	bot.reply(m,"i added " + m.songInfo.title + " to the queue!")
 	queue.push(m);
 	console.log(`added song ${m.songInfo.title} {${m.songInfo.timeLength.m}:${m.songInfo.timeLength.s}} to the queue`);
 	if (queueIsEmpty) { 	//if the added song is the first in queue, play it
@@ -34,14 +33,22 @@ function playSong(bot,msg) {
 		throw new Error("entered a not enhanced msg in playSong function");
 	}
 	var connection = bot.voiceConnection;
-	
-	var stream = ytdl(msg.songInfo.url,"audioonly");
+	try {
+		var stream = ytdl(msg.songInfo.url,"audioonly");
+	} catch (e) {
+		console.log("error while getting the stream");
+		console.log(e);
+		bot.reply(msg,"your video: " + msg.songInfo.title + " could not be played because of an error",{"tts":false},err);
+	}
+
 	try {
 		connection.playRawStream(stream,{"volume":0.3},(e,intent) => {
-			err(e);
+			if (e) {
+				throw e;
+			}
 			console.log("playing " + msg.songInfo.title);
 			bot.setStatus("online",msg.songInfo.title);
-			bot.sendMessage(msg.channel,`now playing ${msg.songInfo.title} {${msg.songInfo.timeLength.m}:${msg.songInfo.timeLength.s}}`,err);
+			bot.sendMessage(msg.channel,`now playing ${msg.songInfo.title} {${msg.songInfo.timeLength.m}:${msg.songInfo.timeLength.s}}`,{"tts":false},err);
 			intent.on("end",(e) => {
 				queue.shift()
 				var nextSong = queue[0];
@@ -71,9 +78,10 @@ function enhanceMessage(msg,callback) {		//adding msg.songInfo so i can get that
 				"s":info.length_seconds - (Math.floor(info.length_seconds/60)*60)
 			}
 			callback(msg);
+			return
 		});
 	} catch (e) {
-		err(e);
+		console.log("There was an error proccessing that video");
 	}
 }
 
@@ -119,17 +127,21 @@ module.exports = {
 		"name":"add",
 		"description":"adds a song to the queue",
 		"exec":(bot,msg) => {
+			if (bot.voiceConnection === null) {
+				bot.reply(msg,"im not in a voice channel!, make me join one with " + options.commandPrefix + self.summon.name,{"tts":false},err);
+				return
+			}
 			enhanceMessage(msg,(m) => {
-				addToQueue(queue,m);
+				addToQueue(bot,m);
 			});	
 		}
 	},
 	"addpl":{
 		"name":"plist",
-		"description":"adds all the songs of a playlist to thea queue",
+		"description":"adds all the songs of a playlist to the queue",
 		"exec":(bot,msg) => {
 			if (!options.youtubeAPIKey) {
-				bot.reply(msg,"No youtube api key specified in the options file, can't get playlist");
+				bot.reply(msg,"No youtube api key specified in the options file, can't get playlist",{"tts":false},err);
 				return
 			}
 			//https://www.youtube.com/playlist?list=PLBHuR7fUesrt3MiAu5wwUDHlcJOBbmPwX
@@ -141,12 +153,12 @@ module.exports = {
 					pid = val.substring(5);
 				}
 			});
-			console.log(pid);
-			var requestURL = "https://www.googleapis.com/youtube/v3/playlistItems" + `?part=contentDetails&maxResults=50&playlistId=${pid}&key=${apiKey}`
+			var requestURL = "https://www.googleapis.com/youtube/v3/playlistItems" + `?part=contentDetails&maxResults=50&playlistId=${pid}&key=${apiKey}`;
+			try {
 			var playList = request.get(requestURL).end((error,res) => {
 				err(error);
 				if (!res.ok) {
-					bot.reply(msg,"there was an error while getting the playlist information");
+					bot.reply(msg,"there was an error while getting the playlist information",{"tts":false},err);
 				}
 				var videoArr = res.body.items;
 
@@ -165,6 +177,10 @@ module.exports = {
 				}
 
 			});
+			} catch (e) {
+				console.log("error came from request");
+				throw e;
+			}
 		}
 	},
 	"queue":{

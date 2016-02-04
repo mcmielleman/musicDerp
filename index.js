@@ -29,6 +29,7 @@ bot.on("ready",(e) => {
 	bot.joinServer(options.discordInvite,(e,serv) => {
 		err(e);
 		console.log("Joined server: " + serv.name);
+		bot.sendMessage(options.musicTextChannelID,"Hello",{"tts":false},err);
 	});
 });
 
