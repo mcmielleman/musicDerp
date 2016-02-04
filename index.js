@@ -66,8 +66,8 @@ function messageHandler(msg,e){
 		case m.startsWith(command.queue.name):
 			command.queue.exec(bot,msg);
 			break;
-		default:
-			bot.reply(msg,"\"" + msg.content + "\" is not a command");
+		case m.startsWith(command.addpl.name):
+			command.addpl.exec(bot,msg);
 			break;
 	}
 }

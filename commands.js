@@ -1,6 +1,7 @@
-const discord = require("discord.js");
 const ytdl = require("ytdl-core");
 const options = require("./options.json");
+const request = require("superagent");
+const discord = require("discord.js");
 
 function err(e) {	//so i don't have to type it everytime
 	if (e) {
@@ -11,15 +12,30 @@ function err(e) {	//so i don't have to type it everytime
 //queue
 var queue = [];
 
+function addToQueue(bot,m) {
+	var queueIsEmpty = false;
+	if (queue[0] === undefined) {
+		queueIsEmpty = true;
+	}
+	bot.reply(m,"i added " + m.songInfo.title + " to the queue!")
+	queue.push(m);
+	console.log(`added song ${m.songInfo.title} {${m.songInfo.timeLength.m}:${m.songInfo.timeLength.s}} to the queue`);
+	if (queueIsEmpty) { 	//if the added song is the first in queue, play it
+		playSong(bot,m);
+	}
+}
+
 function playSong(bot,msg) {
 	if (bot.voiceConnection === null) {
 		bot.reply(msg,"im not in a voice channel!, make me join one with " + options.commandPrefix + self.summon.name,{"tts":false},err);
 		return
 	}
+	if (!msg.enhanced) {
+		throw new Error("entered a not enhanced msg in playSong function");
+	}
 	var connection = bot.voiceConnection;
-	var songUrl = msg.content.split(" ").splice(1)[0];
 	
-	var stream = ytdl(songUrl,"audioonly");
+	var stream = ytdl(msg.songInfo.url,"audioonly");
 	try {
 		connection.playRawStream(stream,{"volume":0.3},(e,intent) => {
 			err(e);
@@ -41,18 +57,24 @@ function playSong(bot,msg) {
 		console.log("error with playing stream");
 	}
 }
-function enhanceMessage(msg,callback) {
-	var songUrl = msg.content.split(" ").splice(1)[0];
-	ytdl.getInfo(songUrl,(e,info) => {
+function enhanceMessage(msg,callback) {		//adding msg.songInfo so i can get that once and be done. async
+	var songUrl = msg.content.split(" ")[1];
+	msg.enhanced = true;
+	msg.songInfo = {};
+	msg.songInfo.url = songUrl;
+	try {
+		ytdl.getInfo(songUrl,(e,info) => {
+			err(e);
+			msg.songInfo.title = info.title;
+			msg.songInfo.timeLength = {
+				"m":Math.floor(info.length_seconds/60),
+				"s":info.length_seconds - (Math.floor(info.length_seconds/60)*60)
+			}
+			callback(msg);
+		});
+	} catch (e) {
 		err(e);
-		msg.songInfo = {};
-		msg.songInfo.title = info.title;		//adding the song title to the message when it's added so i don't have to get them all when the queue command is called
-		msg.songInfo.timeLength = {				//adding the length in minutes (m) and seconds (s) to the songInfo
-			"m":Math.floor(info.length_seconds/60),
-			"s":info.length_seconds - (Math.floor(info.length_seconds/60)*60)
-		}
-		callback(msg);
-	});
+	}
 }
 
 //export
@@ -88,39 +110,61 @@ module.exports = {
 	},
 	"test":{
 		"name":"test",
-		"description":"play the included test file",
+		"description":"command to use for testing of new features, not usefull for end-user",
 		"exec":(bot,msg) => {
-			if (bot.voiceConnection == null) {
-				bot.reply(msg,"im not in a voice channel!, make me join one with " + options.commandPrefix + self.summon.name,{"tts":false},err);
-				return
-			}
-			var connection = bot.voiceConnection;
-			var file = process.cwd() + "/test.mp3";
-			connection.playFile(file,{"volume":0.3},(intent) => {
-				bot.setStatus("online","test/intro",err);
-				intent.on("end", () => {
-					bot.setStatus("online",null,err);
-				});
-			});
-			console.log("playing: test file");
+
 		}
 	},
 	"add":{
 		"name":"add",
 		"description":"adds a song to the queue",
 		"exec":(bot,msg) => {
-			try {
-					enhanceMessage(msg,(m) => {
-						bot.reply(m,"i added " + m.songInfo.title + " to the queue!")
-						queue.push(m);
-						console.log(`added song ${m.songInfo.title} {${m.songInfo.timeLength.m}:${m.songInfo.timeLength.s}} to the queue`);
-						if (queue[0].equals(m)) { 	//if the added song is the first in queue, play it
-							playSong(bot,m);
-						}
+			enhanceMessage(msg,(m) => {
+				addToQueue(queue,m);
+			});	
+		}
+	},
+	"addpl":{
+		"name":"plist",
+		"description":"adds all the songs of a playlist to thea queue",
+		"exec":(bot,msg) => {
+			if (!options.youtubeAPIKey) {
+				bot.reply(msg,"No youtube api key specified in the options file, can't get playlist");
+				return
+			}
+			//https://www.youtube.com/playlist?list=PLBHuR7fUesrt3MiAu5wwUDHlcJOBbmPwX
+			var apiKey = options.youtubeAPIKey;
+			var playlistURL = msg.content.split(" ")[1];
+			var pid;
+			playlistURL.split("?")[1].split("&").forEach((val,i) => {
+				if (val.startsWith("list=")) {
+					pid = val.substring(5);
+				}
+			});
+			console.log(pid);
+			var requestURL = "https://www.googleapis.com/youtube/v3/playlistItems" + `?part=contentDetails&maxResults=50&playlistId=${pid}&key=${apiKey}`
+			var playList = request.get(requestURL).end((error,res) => {
+				err(error);
+				if (!res.ok) {
+					bot.reply(msg,"there was an error while getting the playlist information");
+				}
+				var videoArr = res.body.items;
+
+				for (var i = 0;i<videoArr.length;i++) {
+					var videoId = videoArr[i].contentDetails.videoId;
+					var msgId = `{msg.id}-${i}`;
+					var queueMsg = {
+						"content":`add https://www.youtube.com/watch?v=${videoId}`,
+						"author":msg.author,
+						"channel":msg.channel,
+						"id":`${msg.id}-${i}`
+					}
+					enhanceMessage(queueMsg,(qm) => {
+						addToQueue(bot,qm);
 					});
-			} catch (e) {
-				bot.reply(msg,"That is not a valid url");
-			}		
+				}
+
+			});
 		}
 	},
 	"queue":{
