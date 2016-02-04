@@ -120,7 +120,7 @@ module.exports = {
 		"name":"test",
 		"description":"command to use for testing of new features, not usefull for end-user",
 		"exec":(bot,msg) => {
-
+			bot.reply(msg,"works",{"tts":false},err);
 		}
 	},
 	"add":{
@@ -144,7 +144,6 @@ module.exports = {
 				bot.reply(msg,"No youtube api key specified in the options file, can't get playlist",{"tts":false},err);
 				return
 			}
-			//https://www.youtube.com/playlist?list=PLBHuR7fUesrt3MiAu5wwUDHlcJOBbmPwX
 			var apiKey = options.youtubeAPIKey;
 			var playlistURL = msg.content.split(" ")[1];
 			var pid;
@@ -155,7 +154,7 @@ module.exports = {
 			});
 			var requestURL = "https://www.googleapis.com/youtube/v3/playlistItems" + `?part=contentDetails&maxResults=50&playlistId=${pid}&key=${apiKey}`;
 			try {
-			var playList = request.get(requestURL).end((error,res) => {
+			request.get(requestURL).end((error,res) => {
 				err(error);
 				if (!res.ok) {
 					bot.reply(msg,"there was an error while getting the playlist information",{"tts":false},err);
@@ -190,15 +189,19 @@ module.exports = {
 			var queueWithTitles = [];
 			for (var i = 0;i<queue.length;i++) {
 				var songInfo = queue[i].songInfo;
-				var niceTitle = `${songInfo.title} {${songInfo.timeLength.m}:${songInfo.timeLength.s}} added by ${queue[i].author.username}`
+				var niceTitle = `${songInfo.title} {${songInfo.timeLength.m}:${songInfo.timeLength.s}} added by ${queue[i].author.username}`;
 				queueWithTitles.push(niceTitle);
 			}
 			var queueString = "Queue:\n" + queueWithTitles.join("\n");
-			if (queue[0] === undefined) {
-				bot.sendMessage(msg.channel,"the queue is empty",err);
-			} else {
-				bot.sendMessage(msg.channel,queueString,err);
+			if (queueString.length >= 2000) {
+				queueString = "the entire queue is too long for discord, here are the first 10 items:\n" + queueWithTitles.slice(0,9).join("\n");
 			}
+			if (queue[0] === undefined) {
+				bot.sendMessage(msg.channel,"the queue is empty",{"tts":false},err);
+			} else {
+				bot.sendMessage(msg.channel,queueString,{"tts":false},err);
+			}
+			return
 		}
 	}
 
