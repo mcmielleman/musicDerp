@@ -49,7 +49,8 @@ bot.on("ready",() => {
 
 bot.on("message",messageHandler);
 function messageHandler(msg){
-	if (!msg.channel.id === options.commandChannel) {
+	if (msg.channel.id !== options.commandChannel) {
+		return
 	}
 	var m = msg.content;
 	if (!m.startsWith(options.commandPrefix)) {
@@ -69,6 +70,9 @@ function messageHandler(msg){
 			break;
 		case m.startsWith(command.plist.name):
 			command.plist.run(msg);
+			break;
+		case m.startsWith(command.skip.name):
+			command.skip.run();
 			break;
 	}
 }
