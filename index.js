@@ -59,16 +59,16 @@ function messageHandler(msg){
 	m = m.slice(options.commandPrefix.length);
 	switch (true) {
 		case m.startsWith(command.summon.name):
-			command.summon.command(msg);
+			command.summon.run(msg);
 			break;
 		case m.startsWith(command.add.name):
-			command.add.command(msg);
+			command.add.run(msg);
 			break;
 		case m.startsWith(command.queue.name):
-			command.queue.command(msg);
+			command.queue.run();
 			break;
 		case m.startsWith(command.plist.name):
-			command.plist.command(msg);
+			command.plist.run(msg);
 			break;
 	}
 }
