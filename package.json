@@ -13,7 +13,8 @@
   "dependencies": {
     "discord.js": "^6.0.0",
     "superagent": "^1.7.2",
-    "ytdl-core": "^0.7.9"
+    "ytdl-core": "^0.7.9",
+    "node-opus": "^0.1.11"
   },
   "repository":{
     "type":"git",
