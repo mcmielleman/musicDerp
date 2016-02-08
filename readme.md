@@ -24,6 +24,8 @@ mac users can use brew to install ffmpeg
 ####python 2.7
 this is needed for installing the libraries with npm, on linux, type `sudo apt-get install python2.7`. make sure u set  the `python` command to python 2.7, you can do this by adding this line to your `~/.bashrc`:
 `export PYTHON=/usr/bin/python2.7`
+####opus
+This is the codec that is used to stream to discord, most linux installs already have it but if you get an error saying you don't have opus when trying to play a song. you need to install opus, check out this link: http://www.linuxfromscratch.org/blfs/view/svn/multimedia/opus.html 
 ####other
 for linux, install build-essential: `sudo apt-get install build-essential`.
 
