@@ -5,6 +5,6 @@
 	},
 	"discordInvite":"the http link or just the code at the end",
 	"commandPrefix":"$",
-	"musicTextChannelID":"leave empty to listen for commands in all text channels",
+	"commandChannel":"enter the id for the text channel to listen to here",
 	"youtubeAPIKey":"enter your youtube api key here"
 }
