@@ -1,80 +1,79 @@
-const discord = require("discord.js");
-var command = require("./commands.js");
+var discord = require("discord.js");
+var command = require("./lib/commands.js");
+var Queue = require("./lib/Queue.js");
+var play = require("./lib/play.js");
+
 try {
 	var options = require("./options.json");
 } catch (e) {
 	console.log("no options file, did you replace options.json.example with options.json?");
-	console.log("error:");
-	throw e;
+	process.exit(0);
 }
 
-function err(e) {	//so i don't have to type it everytime
-	if (e) {
-		throw e;
-	}
-}
-var musicTextChannelIDisSet = false;
-if (options.musicTextChannelID !== undefined && options.musicTextChannelID !== null && options.musicTextChannelID !== "") {
-	var musicTextChannelIDisSet = true;
+global.bot = new discord.Client();	//initializing the bot, it is global so that the modules can acces the bot
+bot.quickSend = function(msg) {			//adding a quikSend message so the bot doesn't have to
+	bot.sendMessage(options.commandChannel,msg,{"tts":false},e => {
+		if (e) throw e;
+	});
 }
 
-var bot = new discord.Client();
+if (typeof options.commandChannel !== "string" && options.commandChannel != undefined) {
+	throw new TypeError("options.commandChannel is not a string");
+}
 
-//bot.on("debug", (m) => console.log("[debug]", m)); //uncomment to show debug messages in console
+//queue handling
+global.queue = new Queue();
+bot.on("songEnd",(song) => {
+	play(queue.next());
+});
+
+//logging debug and warn messages to console, feel free to comment these 2 lines if you don't want those messages in console
+bot.on("debug", (m) => console.log("[debug]", m));
 bot.on("warn", (m) => console.log("[warn]", m));
 
-bot.on("ready",(e) => {
-	err(e);
+//bot event listeners
+bot.on("ready",() => {
 	console.log("ready");
-	bot.joinServer(options.discordInvite,(e,serv) => {
-		err(e);
+	bot.joinServer(options.discordInvite,(e,serv) => {	//when the bot is ready, make it join the specified server
+		if (e) throw e;
+
 		console.log("Joined server: " + serv.name);
-		bot.sendMessage(options.musicTextChannelID,"Hello",{"tts":false},err);
+		//now that the bot is on the server, it can check if the commandChannel is valid
+		if (!options.commandChannel) {
+			options.commandchannel = serv.channels.get("type","text");
+		}
+
+		bot.quickSend("hello");
 	});
 });
 
 bot.on("message",messageHandler);
-function messageHandler(msg,e){
-	err(e);
-	var m = msg.content;
-
-	if (musicTextChannelIDisSet) {
-		if (msg.channel.id !== options.musicTextChannelID) {
-			return
-		}
+function messageHandler(msg){
+	if (!msg.channel.id === options.commandChannel) {
 	}
+	var m = msg.content;
 	if (!m.startsWith(options.commandPrefix)) {
 		return
 	}
 
-	m = m.slice(1);
+	m = m.slice(options.commandPrefix.length);
 	switch (true) {
 		case m.startsWith(command.summon.name):
-			command.summon.exec(bot,msg);
-			break;
-		case m.startsWith(command.play.name):
-			command.play.exec(bot,msg);
-			break;
-		case m.startsWith(command.stop.name):
-			command.stop.exec(bot,msg);
-			break;
-		case m.startsWith(command.test.name):
-			command.test.exec(bot,msg);
+			command.summon.command(msg);
 			break;
 		case m.startsWith(command.add.name):
-			command.add.exec(bot,msg);
+			command.add.command(msg);
 			break;
 		case m.startsWith(command.queue.name):
-			command.queue.exec(bot,msg);
+			command.queue.command(msg);
 			break;
-		case m.startsWith(command.addpl.name):
-			command.addpl.exec(bot,msg);
+		case m.startsWith(command.plist.name):
+			command.plist.command(msg);
 			break;
 	}
 }
-
+// Handle ECONNRESETs caused by skip
 process.on('uncaughtException', function(e) {
-  // Handle ECONNRESETs caused by `next` or `destroy`
   if (e.code == 'ECONNRESET') {
     // Yes, I'm aware this is really bad node code. However, the uncaught exception
     // that causes this error is buried deep inside either discord.js, ytdl or node
@@ -88,11 +87,12 @@ process.on('uncaughtException', function(e) {
     console.log(e.stack);
   } else {
     // Normal error handling
-   	err(e)
+   	throw e;
   }
 });
 
+//start the bot
 bot.login(options.discordAccount.email,options.discordAccount.password,(e) => {
-	err(e);
+	if (e) throw e;
 	console.log("logged in!");
 });
