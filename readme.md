@@ -25,7 +25,7 @@ mac users can use brew to install ffmpeg
 this is needed for installing the libraries with npm, on linux, type `sudo apt-get install python2.7`. make sure u set  the `python` command to python 2.7, you can do this by adding this line to your `~/.bashrc`:
 `export PYTHON=/usr/bin/python2.7`
 ####opus
-This is the codec that is used to stream to discord, most linux installs already have it but if you get an error saying you don't have opus when trying to play a song. you need to install opus, check out this link: http://www.linuxfromscratch.org/blfs/view/svn/multimedia/opus.html 
+This is the codec that is used to stream to discord, most linux installs already have it but if you get an error saying you don't have opus when trying to play a song. you need to install opus, check out this link: http://www.linuxfromscratch.org/blfs/view/svn/multimedia/opus.html
 ####other
 for linux, install build-essential: `sudo apt-get install build-essential`.
 
@@ -33,7 +33,7 @@ for OSX install Xcode command line tools
 
 ###MusicDerp installation
 ------------------------------
-once you've installed all the dependencies, download this source, and put it in a nice place. run npm install in the folder where index.js and package.json are. if you are getting any errors with `node-gyp` while installing there's probably something wrong with your python install.
+once you've installed all the dependencies, download this source, and put it in a nice place. run `sudo npm install` in the folder where index.js and package.json are. if you are getting any errors with `node-gyp` while installing there's probably something wrong with your python install.
 if the install ran succesfully:
 rename `options.json.example` to `options.json` and fill in all the details, note: the youtube api key is optional but is required for the youtube playlist functionallity.
 to create a youtube api key,
