@@ -17,6 +17,7 @@ based on [discord.js](http://hydrabolt.github.io/discord.js/).
 * playlast [position]: plays the song that was played before the current song.
 * history            : prints the song history to chat.
 * clear              : clears the queue.
+
 ##installation
 MusicDerp is easiest to install on ubuntu or similar linux distro's, because i don't have windows i cannot provide installation instructions for windows. the following instructions should work for linux and mac
 ###dependencies:
