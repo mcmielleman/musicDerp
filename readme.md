@@ -6,18 +6,17 @@ based on [discord.js](http://hydrabolt.github.io/discord.js/).
 ##commands
 
 *arguments in square brackets are optional*
-* help   : prints help to chat. arguments [command]
-* summon : makes the bot join your current voicechannel. arguments: none
-* add    : adds a song to the queue. arguments: url
-* queue  : prints the queue to the text channel. arguments: none
-* plist  : add the first 50 videos of a playlist to the queue. arguments: url
-* skip   : skips to the next song. arguments: none
-* repeat : plays the current song again after the end of this song. arguments: [amountofrepeats]
-* replay : plays the current song again at the end of the queue. arguments: [amountofreplays]
-* playlast: plays the song that was played before the current song. arguments: [positioninhistory]
-* history: prints the song history to chat. arguments: none
-* clear  : clears the queue. argumenten: none
-
+* help [command]     : prints help to chat.
+* summon             : makes the bot join your current voicechannel.
+* add <<url>url>          : adds a song to the queue.
+* queue              : prints the queue to the text channel.
+* plist <<url>url>        : add the first 50 videos of a playlist to the queue.
+* skip               : skips to the next song.
+* repeat [amount]    : plays the current song again after the end of this song.
+* replay [amount]    : plays the current song again at the end of the queue.
+* playlast [position]: plays the song that was played before the current song.
+* history            : prints the song history to chat.
+* clear              : clears the queue.
 ##installation
 MusicDerp is easiest to install on ubuntu or similar linux distro's, because i don't have windows i cannot provide installation instructions for windows. the following instructions should work for linux and mac
 ###dependencies:
