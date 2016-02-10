@@ -3,12 +3,20 @@ a bot that plays music in discord,
 based on [discord.js](http://hydrabolt.github.io/discord.js/).
 
 **this bot is WIP so expect some crashes, when it  does crash, you can create a new issue on the github page, please provide instructions on how to recreate the crash**
-##features
+##commands
 
-*  play song from youtube url
-*  play youtube playlist from playlist url
-*  print queue in chat
-*  skip songs
+*arguments in square brackets are optional*
+* help   : prints help to chat. arguments [command]
+* summon : makes the bot join your current voicechannel. arguments: none
+* add    : adds a song to the queue. arguments: url
+* queue  : prints the queue to the text channel. arguments: none
+* plist  : add the first 50 videos of a playlist to the queue. arguments: url
+* skip   : skips to the next song. arguments: none
+* repeat : plays the current song again after the end of this song. arguments: [amountofrepeats]
+* replay : plays the current song again at the end of the queue. arguments: [amountofreplays]
+* playlast: plays the song that was played before the current song. arguments: [positioninhistory]
+* history: prints the song history to chat. arguments: none
+* clear  : clears the queue. argumenten: none
 
 ##installation
 MusicDerp is easiest to install on ubuntu or similar linux distro's, because i don't have windows i cannot provide installation instructions for windows. the following instructions should work for linux and mac
@@ -34,8 +42,9 @@ for OSX install Xcode command line tools
 ###MusicDerp installation
 ------------------------------
 once you've installed all the dependencies, download this source, and put it in a nice place. run `sudo npm install` in the folder where index.js and package.json are. if you are getting any errors with `node-gyp` while installing there's probably something wrong with your python install.
-if the install ran succesfully:
-rename `options.json.example` to `options.json` and fill in all the details, note: the youtube api key is optional but is required for the youtube playlist functionallity.
+
+**if the install ran succesfully:**
+rename `options.json.example` to `options.json` and fill in all the details, note: the youtube api key is optional but is required for the youtube playlist functionality.
 to create a youtube api key,
 read [this](https://developers.google.com/youtube/v3/getting-started) and follow the instructions.
 after you've done this try to run the bot with either: `node index.js` or `npm start`.

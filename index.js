@@ -24,10 +24,18 @@ if (typeof options.commandChannel !== "string" && options.commandChannel != unde
 //queue handling
 global.queue = new Queue();
 bot.on("songEnd",(song) => {
-	play(queue.next());
+	var nextSong = queue.next();
+	if (!nextSong) {
+		bot.quickSend("i finished the queue");
+		bot.setStatus("online",null, e => {
+			if (e) throw e;
+		});
+		return
+	}
+	play(nextSong);
 });
 
-//logging debug and warn messages to console, feel free to comment these 2 lines if you don't want those messages in console
+//logging debug and warn messages to console, feel free to comment either of these 2 lines if you don't want those messages in console
 bot.on("debug", (m) => console.log("[debug]", m));
 bot.on("warn", (m) => console.log("[warn]", m));
 
@@ -49,31 +57,22 @@ bot.on("ready",() => {
 
 bot.on("message",messageHandler);
 function messageHandler(msg){
-	if (msg.channel.id !== options.commandChannel) {
+	var m = msg.content;
+	if (!m.startsWith(options.commandPrefix) || msg.author.equals(bot.user) || (msg.channel.id !== options.commandChannel && msg.content.startsWith(`${options.commandPrefix}${command.init.name}`))) {
 		return
 	}
-	var m = msg.content;
-	if (!m.startsWith(options.commandPrefix)) {
+	if (msg.channel.id !== options.commandChannel ) {
 		return
 	}
 
 	m = m.slice(options.commandPrefix.length);
-	switch (true) {
-		case m.startsWith(command.summon.name):
-			command.summon.run(msg);
+
+	for (var com in command) {
+		var current = command[com];
+		if (m.startsWith(current.name)) {
+			current.run(msg);
 			break;
-		case m.startsWith(command.add.name):
-			command.add.run(msg);
-			break;
-		case m.startsWith(command.queue.name):
-			command.queue.run();
-			break;
-		case m.startsWith(command.plist.name):
-			command.plist.run(msg);
-			break;
-		case m.startsWith(command.skip.name):
-			command.skip.run();
-			break;
+		}
 	}
 }
 // Handle ECONNRESETs caused by skip
